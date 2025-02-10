@@ -53,6 +53,27 @@ class GenericJsonRepository<E extends Entity> implements Repository<E> {
         return entity;
     }
 
+    public void update(E entity) {
+        Optional<E> existingEntity = findById(entity.getId());
+
+        if (existingEntity.isPresent()) {
+            entities.remove(existingEntity.get());
+            entities.add(entity);
+            saveAll();
+        } else {
+            throw new IllegalArgumentException("Сутність з таким ID не знайдена.");
+        }
+    }
+
+    private void saveAll() {
+        try {
+            Files.writeString(path, gson.toJson(entities));
+        } catch (IOException e) {
+            throw new JsonFileIOException(
+                "Помилка при збереженні файлу %s.".formatted(path.getFileName()));
+        }
+    }
+
     @Override
     public boolean remove(E entity) {
         return entities.remove(entity);

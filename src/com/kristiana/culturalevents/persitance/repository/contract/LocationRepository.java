@@ -7,4 +7,6 @@ import java.util.Optional;
 public interface LocationRepository extends Repository<EventLocation> {
 
     Optional<EventLocation> findByName(String name);
+
+    void update(EventLocation eventLocation);
 }

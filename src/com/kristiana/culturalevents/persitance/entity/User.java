@@ -2,11 +2,10 @@ package com.kristiana.culturalevents.persitance.entity;
 
 import com.kristiana.culturalevents.persitance.exception.EntityArgumentException;
 import java.time.LocalDate;
-import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-public class User extends Entity {
+public class User extends Entity implements Comparable<User> {
 
     private final String password;
     private final LocalDate birthday;
@@ -19,7 +18,7 @@ public class User extends Entity {
         super(id);
         this.password = validatedPassword(password);
         setEmail(email);
-        this.birthday = validatedBirthday(birthday);
+        this.birthday = birthday;
         setUsername(username);
         this.role = role;
 
@@ -82,15 +81,6 @@ public class User extends Entity {
         this.username = username;
     }
 
-
-    private LocalDate validatedBirthday(LocalDate birthday) {
-        if (birthday == null || birthday.isAfter(LocalDate.now())) {
-            errors.add("Дата народження не може бути в майбутньому або пустою.");
-        }
-
-        return birthday;
-    }
-
     private String validatedPassword(String password) {
         final String templateName = "пароля";
 
@@ -119,39 +109,23 @@ public class User extends Entity {
             '}';
     }
 
+    @Override
+    public int compareTo(User o) {
+        return this.username.compareTo(o.username);
+    }
+
     public enum Role {
-        ADMIN("admin", Map.of(
-            EntityName.COMMENT, new Permission(true, true, true, true),
-            EntityName.EVENT, new Permission(true, true, true, true),
-            EntityName.LOCATION, new Permission(true, true, true, true),
-            EntityName.USER, new Permission(true, true, true, true))),
-        GENERAL("general", Map.of(
-            EntityName.COMMENT, new Permission(true, true, true, true),
-            EntityName.EVENT, new Permission(true, false, true, true),
-            EntityName.LOCATION, new Permission(false, false, false, true),
-            EntityName.USER, new Permission(false, false, false, false)));
+        ADMIN("admin"),
+        GENERAL("general");
 
         private final String name;
-        private final Map<EntityName, Permission> permissions;
 
-        Role(String name, Map<EntityName, Permission> permissions) {
+        Role(String name) {
             this.name = name;
-            this.permissions = permissions;
         }
 
         public String getName() {
             return name;
-        }
-
-        public Map<EntityName, Permission> getPermissions() {
-            return permissions;
-        }
-
-        public enum EntityName {COMMENT, EVENT, LOCATION, USER}
-
-        public record Permission(boolean canAdd, boolean canEdit, boolean canDelete,
-                                 boolean canRead) {
-
         }
     }
 }
